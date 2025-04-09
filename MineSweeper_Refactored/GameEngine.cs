@@ -2,483 +2,178 @@
 
 internal class GameEngine
 {
-    static int bombCount;
-    static int x_choice;
-    static int y_choice;
-    static int boardSize;
-    static int level;
+    const int GAME_END_SLEEP_TIME = 2000;
+    const int MAX_STARS = 13;
+
+    static (int x, int y) cell;
+    static GameBoard gameBoard;
+    static int gameLevel;
 
     bool lose;
     bool win;
-    bool true_info;
+    bool valid_input;
     bool continue_game;
 
     public GameEngine()
     {
         lose = false;
         win = false;
-        true_info = false;
+        valid_input = false;
         continue_game = true;
+
+        Console.Clear();
+        Console.ResetColor();
     }
     public void RunGame()
     {
-        StartGame(ref bombCount, ref boardSize);
+        PrintGameBanner();
+
+        gameLevel = GetGameLevel();
+        gameBoard = new GameBoard(gameLevel);
+        gameBoard.Initialise();
+      
         Thread.Sleep(100);
-
-        bool[,] choice_board = new bool[boardSize, boardSize];
-        char[,] game_board = new char[boardSize, boardSize];
-
-        SetBombs(ref game_board, bombCount, ref choice_board);
 
         while (continue_game)
         {
-            true_info = true;
+            valid_input = true;
+            
             Console.Clear();
-            PrintBoard(game_board, lose, choice_board);
-            Console.WriteLine();
-
+            gameBoard.PrintInGameBoard(lose); // change parameter to game status for readabiity
+          
             try
             {
-                Console.Write("insert x:");
-                x_choice = int.Parse(Console.ReadLine());
-                Console.Write("insert y:");
-                y_choice = int.Parse(Console.ReadLine());
+                cell = GetCellCoordinates();
             }
             catch
             {
-                true_info = false;
+                valid_input = false;
             }
 
-            if (x_choice < 1 || x_choice > boardSize || y_choice < 1 || y_choice > boardSize)
+            if (cell.x < 1 || cell.x > gameBoard.BoardDimensions || cell.y < 1 || cell.y > gameBoard.BoardDimensions)
             {
-                true_info = false;
+                valid_input = false;
             }
 
-            CheckWin(ref win, choice_board);
-
-            if (true_info)
+            if (valid_input)
             {
-                CheckGame(ref game_board, x_choice - 1, y_choice - 1, ref lose, ref win, ref choice_board, ref continue_game);
+                bool endGame = gameBoard.IsCellBomb(cell);
+               
+                if(endGame)
+                { // add code to give reset option
+                    ExitGameAfterPlaying(ref gameBoard,GameStatus.Loss);
+                }
+                else
+                { // add code to give reset option
+                    gameBoard.UpdateBoard(cell);
+                    win = gameBoard.IsGameWon();
+                    if (win)
+                    {
+                        ExitGameAfterPlaying(ref gameBoard, GameStatus.Won);
+                    }
+                }
             }
-
-            CheckWin(ref win, choice_board);
-
         }
         Console.ReadKey();
     }
 
-    public static void FindEmpty(ref char[,] char_board, int x, int y, ref bool[,] bool_board)
+   
+    private static void ExitGameAfterPlaying(ref GameBoard gameBoard ,GameStatus gameStatus)
     {
-        if (bool_board[x, y] == false)
+        PrintGameResultBannerAndBoard(gameBoard,gameStatus);
+        Thread.Sleep(GAME_END_SLEEP_TIME);
+        PrintGameOverBanner(gameStatus);
+        Environment.Exit(0);
+    }
+    
+    private static void ExitGameBeforePlaying()
+    {
+        Console.WriteLine("\n Exitng game...");
+        Thread.Sleep(500);
+        Environment.Exit(0);
+    }
+   
+    //private static void ResetGame(ref bool lose, ref bool win, ref char[,] char_board, ref bool[,] bool_board)
+    //{
+    //    lose = false;
+    //    win = false;
+
+    //    PrintGameBanner();
+    //    StartGame(ref bombCount, ref boardSize);
+
+    //    bool[,] choice_board = new bool[boardSize, boardSize];
+    //    char[,] game_board = new char[boardSize, boardSize];
+    //    char_board = game_board;
+    //    bool_board = choice_board;
+    //    SetBombs(ref char_board, bombCount, ref bool_board);
+    //}
+
+    private static int GetGameLevel()
+    {
+        int level = 0;
+        PrintGameOptions();
+
+        ConsoleKeyInfo keyInput = Console.ReadKey(intercept: true);
+
+        switch (keyInput.Key)
         {
-            if (char_board[x, y] != 'B')
-            {
-                bool_board[x, y] = true;
-            }
-            if (x > 0)
-            {
-                if (char_board[x - 1, y] != 'B')
-                {
-                    bool_board[x - 1, y] = true;
-
-                }
-            }
-
-            if (x > 0 && y < boardSize - 1)
-            {
-                if (char_board[x - 1, y + 1] != 'B')
-                {
-                    bool_board[x - 1, y + 1] = true;
-
-                }
-            }
-
-            if (x > 0 && y > 0)
-            {
-                if (char_board[x - 1, y - 1] != 'B')
-                {
-                    bool_board[x - 1, y - 1] = true;
-
-                }
-            }
-
-            if (y > 0)
-            {
-                if (char_board[x, y - 1] != 'B')
-                {
-                    bool_board[x, y - 1] = true;
-
-                }
-            }
-
-            if (y < boardSize - 1)
-            {
-                if (char_board[x, y + 1] != 'B')
-                {
-                    bool_board[x, y + 1] = true;
-
-                }
-            }
-
-            if (x < boardSize - 1 && y < boardSize - 1)
-            {
-                if (char_board[x + 1, y + 1] != 'B')
-                {
-                    bool_board[x + 1, y + 1] = true;
-
-                }
-            }
-
-            if (x < boardSize - 1 && y > 0)
-            {
-                if (char_board[x + 1, y - 1] != 'B')
-                {
-                    bool_board[x + 1, y - 1] = true;
-
-                }
-            }
-
-
+            case ConsoleKey.D1:
+            case ConsoleKey.NumPad1:
+                level = 1;
+                break;
+            case ConsoleKey.D2:
+            case ConsoleKey.NumPad2:
+                level = 2;
+                break;
+            case ConsoleKey.D3:
+            case ConsoleKey.NumPad3:
+                level = 3;
+                break;
+            case ConsoleKey.Escape:
+                ExitGameBeforePlaying();
+                break;
+            default:
+                level = 0;
+                break;
         }
+        return level;
     }
 
-    public static void CheckGame(ref char[,] char_board, int x, int y, ref bool lose_status, ref bool win_status, ref bool[,] bool_board, ref bool continue_status)
+    private static (int, int) GetCellCoordinates()
     {
-        if (char_board[x, y] == 'B')
+        (int x, int y) cell;
+
+        Console.Write("\nEnter cell x,y: ");
+
+        string? input = Console.ReadLine();
+        string x = input.Split(",")[0];
+        string y = input.Split(",")[1];
+
+        try
         {
-            continue_status = false;
-
-            lose_status = true;
-            win_status = false;
-            Console.Clear();
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.Red;
-
-            Console.WriteLine("=================\\ !!! You Lose !!! /=================");
-
-            for (int i = 0; i < boardSize; i++)
-            {
-
-                for (int j = 0; j < boardSize; j++)
-                {
-                    Console.Write($"|{char_board[i, j]}|");
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-            Console.Write("Reset Game(Y or N):");
-            string reset = Console.ReadLine();
-            if (reset == "Y" || reset == "y")
-            {
-                continue_status = true;
-                Console.ResetColor();
-                ResetGame(ref lose_status, ref win_status, ref char_board, ref bool_board);
-                Console.ResetColor();
-            }
-            else
-            {
-                Console.Clear();
-                Console.WriteLine("\n\n\n\t\t Game Over");
-                Thread.Sleep(3999);
-                Console.ResetColor();
-                Environment.Exit(0);
-
-            }
-
+            cell.x = Int32.Parse(x);
+            cell.y = Int32.Parse(y);
         }
-        else
+        catch (Exception ex)
         {
-            FindEmpty(ref char_board, x, y, ref bool_board);
+            throw;
         }
 
-        CheckWin(ref win_status, bool_board);
-        if (win_status)
-        {
-            continue_status = false;
-
-            lose_status = true;
-            win_status = false;
-            Console.Clear();
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
-
-            Console.WriteLine("=================\\ !!! You Win !!! /=================");
-            for (int i = 0; i < boardSize; i++)
-            {
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                for (int j = 0; j < boardSize; j++)
-                {
-                    Console.Write($"|{char_board[i, j]}|");
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-            Console.Write("Reset Game(Y or N):");
-            string reset = Console.ReadLine();
-            if (reset == "Y" || reset == "y")
-            {
-                continue_status = true;
-                Console.ResetColor();
-                ResetGame(ref lose_status, ref win_status, ref char_board, ref bool_board);
-                Console.ResetColor();
-            }
-            else
-            {
-                Console.Clear();
-                Console.WriteLine("\n\n\n\t\t Game Over");
-                Thread.Sleep(3999);
-                Console.ResetColor();
-                Environment.Exit(0);
-
-            }
-        }
+        return cell;
     }
-    public static void PrintBoard(char[,] char_board, bool statuse, bool[,] bool_board)
+    
+    #region Helper Functions 
+    private static void PrintGameBanner()
     {
-        for (int k = 0; k < boardSize; k++)
-        {
-            if (k == 0)
-                Console.Write($"    {k + 1}");
-            else if (k != 9)
-                Console.Write($"  {k + 1}");
-            else if (k == 8)
-                Console.Write($" {k + 1} ");
-            else
-                Console.Write($"  {k + 1}");
-        }
-        Console.WriteLine();
-
-        for (int i = 0; i < boardSize; i++)
-        {
-            for (int j = 0; j < boardSize; j++)
-            {
-                if (j == 0 && i != 9)
-                    Console.Write($" {i + 1} ");
-                else if (i == 9 && j == 0)
-                    Console.Write($"{i + 1} ");
-
-                //print bomb if lose
-                if (char_board[i, j] == 'B' && statuse)
-                {
-                    Console.Write($"|B|");
-                }
-                // print "?" 
-                else if ((char_board[i, j] == 'B' && !statuse) || (char_board[i, j] == ' ' && bool_board[i, j] == false) || (char_board[i, j] != 'B' && char_board[i, j] != ' ' && bool_board[i, j] == false))
-                {
-                    Console.Write($"|?|");
-                }
-                // print 1,2,3 if selected
-                else if (char_board[i, j] != 'B' && bool_board[i, j] == true)
-                {
-                    if (char_board[i, j] != ' ')
-                        if (char_board[i, j] == '1')
-                            Console.ForegroundColor = ConsoleColor.DarkBlue;
-                        else if (char_board[i, j] == '2')
-                            Console.ForegroundColor = ConsoleColor.DarkGreen;
-                        else if (char_board[i, j] == '3')
-                            Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        else if (char_board[i, j] == '4')
-                            Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                        else if (char_board[i, j] == '5')
-                            Console.ForegroundColor = ConsoleColor.DarkRed;
-                        else if (char_board[i, j] == '6')
-                            Console.ForegroundColor = ConsoleColor.DarkCyan;
-                        else
-                            Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write($"|{char_board[i, j]}|");
-                    Console.ResetColor();
-
-                }
-
-            }
-            Console.WriteLine();
-        }
-    }
-    private static void SetBombs(ref char[,] board_char, int number, ref bool[,] board_bool)
-    {
-
-        Random rand = new Random();
-        int x, y;
-
-        while (number > 0)
-        {
-            do
-            {
-                x = rand.Next(0, boardSize);
-                y = rand.Next(0, boardSize);
-                //Console.WriteLine($"{x},{y}");
-            } while (board_char[x, y] == 'B');
-            board_char[x, y] = 'B';
-            number--;
-        }
-        for (int i = 0; i < boardSize; i++)
-        {
-            for (int j = 0; j < boardSize; j++)
-            {
-                if (board_char[i, j] != 'B')
-                {
-                    board_char[i, j] = ' ';
-                }
-                board_bool[i, j] = false;
-            }
-        }
-        int num_bomb = 0;
-        for (int i = 0; i < boardSize; i++)
-        {
-            for (int j = 0; j < boardSize; j++)
-            {
-                if (board_char[i, j] != 'B')
-                {
-                    if (i > 0 && board_char[i - 1, j] == 'B') // North neighbor
-                    {
-                        num_bomb++;
-                    }
-                    if (i > 0 && j < boardSize - 1 && board_char[i - 1, j + 1] == 'B') // East North neighbor
-                    {
-                        num_bomb++;
-                    }
-
-                    if (i > 0 && j > 0 && board_char[i - 1, j - 1] == 'B') // West North neighbor
-                    {
-                        num_bomb++;
-                    }
-
-                    if (j > 0 && board_char[i, j - 1] == 'B') // West neighbor
-                    {
-                        num_bomb++;
-                    }
-
-                    if (j < boardSize - 1 && board_char[i, j + 1] == 'B') // East neighbor
-                    {
-                        num_bomb++;
-                    }
-
-                    if (i < boardSize - 1 && j < boardSize - 1 && board_char[i + 1, j + 1] == 'B') // South neighbor
-                    {
-                        num_bomb++;
-                    }
-
-                    if (i < boardSize - 1 && j > 0 && board_char[i + 1, j - 1] == 'B') // West South neighbor
-                    {
-                        num_bomb++;
-                    }
-                    if (i < boardSize - 1 && board_char[i + 1, j] == 'B') // South
-                    {
-                        num_bomb++;
-                    }
-
-                }
-                if (num_bomb > 0)
-                {
-                    string str = num_bomb.ToString();
-                    char[] temp = str.ToCharArray();
-                    board_char[i, j] = temp[0];
-
-                }
-                num_bomb = 0;
-            }
-        }
-    }
-    private static void CheckWin(ref bool win, bool[,] board_bool)
-    {
-        int cnt = 0;
-        for (int i = 0; i < boardSize; i++)
-        {
-            for (int j = 0; j < boardSize; j++)
-            {
-                if (board_bool[i, j] == true)
-                {
-                    cnt++;
-                }
-            }
-        }
-        if (cnt + bombCount == (boardSize * boardSize))
-        {
-            win = true;
-        }
-    }
-
-    private static void ResetGame(ref bool lose, ref bool win, ref char[,] char_board, ref bool[,] bool_board)
-    {
-        lose = false;
-        win = false;
-        StartGame(ref bombCount, ref boardSize);
-        bool[,] choice_board = new bool[boardSize, boardSize];
-        char[,] game_board = new char[boardSize, boardSize];
-        char_board = game_board;
-        bool_board = choice_board;
-        SetBombs(ref char_board, bombCount, ref bool_board);
-    }
-    private static void StartGame(ref int BOMB, ref int SIZE)
-    {
-        bool true_info = false;
         Console.Clear();
-
-        while (!true_info)
-        {
-            PrintCopyRightBanner();
-            PrintGameOptions();
-
-            string? selectedOption = Console.ReadLine();
-            true_info = true;
-
-            try
-            {
-                level = Int32.Parse(selectedOption);
-            }
-            catch (FormatException e)
-            {
-                level = 0; // will trigger the default game board
-            }
-
-            switch (level)
-            {
-                case 1:
-                    BOMB = 5;
-                    SIZE = 5;
-                    break;
-
-                case 2:
-                    BOMB = 15;
-                    SIZE = 8;
-                    break;
-
-                case 3:
-                    BOMB = 25;
-                    SIZE = 10;
-                    break;
-
-                default:
-                    BOMB = 15;
-                    SIZE = 10;
-                    break;
-            }
-
-        }
+        PrintRowofStars(MAX_STARS);
+        Console.WriteLine("*                       *");
+        Console.WriteLine("*      MINESWEEPER      *");
+        Console.WriteLine("*                       *");
+        PrintRowofStars(MAX_STARS);
     }
-
-    #region Helper Functions --> I added this code
-    static void PrintCopyRightBanner()
-    {
-        const int maxStars = 13;
-
-        PrintRowofStars(maxStars);
-        for (int j = 0; j < 2; j++)
-        {
-            if (j == 0)
-            {
-                Console.WriteLine("*  Farzad Foroozanfar   *");
-
-            }
-            if (j == 1)
-            {
-                Console.WriteLine("*                       *");
-                Console.WriteLine("*  Copyright(c) 2022    *");
-            }
-        }
-        PrintRowofStars(maxStars);
-    }
-    static void PrintRowofStars(int starCount)
+   
+    private static void PrintRowofStars(int starCount)
     {
         for (int i = 0; i < starCount; i++)
         {
@@ -492,9 +187,84 @@ internal class GameEngine
             }
         }
     }
-    static void PrintGameOptions()
+    private static void PrintGameOptions()
     {
-        Console.Write("\n\n 1-Beginner(5*5)\n 2-Normal(8*8)\n 3-Hard(10*10)\n Select the Game level :");
+        Console.Write("\n\n 1-Beginner(5*5)\n 2-Normal(8*8)\n 3-Hard(10*10)\n\n Select the Game level: ");
+    }
+
+    private static void PrintResetOptions(GameStatus game_status)
+    {
+        Console.ResetColor();
+        SetForegroundColorForGameStatus(game_status);
+        
+        Console.WriteLine();
+        Console.Write("Reset Game(Y or N): ");
+
+        Console.ResetColor();
+    }
+
+
+
+    private static void PrintGameResultBannerAndBoard(GameBoard game_board, GameStatus game_status)
+    {
+        string resultBanner = GetResultBanner(game_status);
+
+        Console.Clear();
+        SetForegroundColorForGameStatus(game_status);
+        Console.WriteLine(resultBanner);
+
+        bool loss_status = (game_status == GameStatus.Loss);
+        game_board.PrintFinalResultsGameBoard();
+
+    }
+
+
+
+    private static void PrintGameOverBanner(GameStatus game_status)
+    {
+        Console.Clear();
+        SetForegroundColorForGameStatus(game_status);
+
+        Console.WriteLine("\n\n\n\t\t Game Over\n");
+        Thread.Sleep(GAME_END_SLEEP_TIME);
+        Console.ResetColor();
+    }
+
+    private static void SetForegroundColorForGameStatus(GameStatus game_status)
+    {
+        Console.ResetColor();
+
+        switch (game_status)
+        {
+            case GameStatus.Won:
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                break;
+            case GameStatus.Loss:
+                Console.ForegroundColor = ConsoleColor.Red;
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    private static string GetResultBanner(GameStatus game_status)
+    {
+        string resultBanner = String.Empty;
+
+        switch (game_status)
+        {
+            case GameStatus.Won:
+                resultBanner = "=================\\ !!! You Win !!! /=================";
+                break;
+            case GameStatus.Loss:
+                resultBanner = "=================\\ !!! You Lose !!! /=================";
+                break;
+            default:
+                break;
+        }
+
+        return resultBanner;
     }
 
     #endregion
