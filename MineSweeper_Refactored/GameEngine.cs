@@ -11,15 +11,15 @@ internal class GameEngine
 
     bool lose;
     bool win;
-    bool valid_input;
-    bool continue_game;
+    bool validInput;
+    bool continueGame;
 
     public GameEngine()
     {
         lose = false;
         win = false;
-        valid_input = false;
-        continue_game = true;
+        validInput = false;
+        continueGame = true;
 
         Console.Clear();
         Console.ResetColor();
@@ -34,9 +34,9 @@ internal class GameEngine
       
         Thread.Sleep(100);
 
-        while (continue_game)
+        while (continueGame)
         {
-            valid_input = true;
+            validInput = true;
             
             Console.Clear();
             gameBoard.PrintInGameBoard(lose); // change parameter to game status for readabiity
@@ -44,18 +44,17 @@ internal class GameEngine
             try
             {
                 cell = GetCellCoordinates();
+                if (gameBoard.IsCellOutOfBounds(cell))
+                {
+                    validInput = false;
+                }
             }
             catch
             {
-                valid_input = false;
+                validInput = false;
             }
 
-            if (cell.x < 1 || cell.x > gameBoard.BoardDimensions || cell.y < 1 || cell.y > gameBoard.BoardDimensions)
-            {
-                valid_input = false;
-            }
-
-            if (valid_input)
+            if (validInput)
             {
                 bool endGame = gameBoard.IsCellBomb(cell);
                

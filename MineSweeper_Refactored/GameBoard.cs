@@ -139,6 +139,10 @@ internal class GameBoard
         return (game_board[inputCell.x - 1, inputCell.y - 1] == 'B') ? true : false;
     }
 
+    public bool IsCellOutOfBounds((int x, int y) inputCell)
+    {
+        return (inputCell.x < 1 || inputCell.x > _boardSize || inputCell.y < 1 || inputCell.y > _boardSize);
+    }
     public void UpdateBoard((int x, int y) inputCell)
     {
         int x = inputCell.x - 1;
