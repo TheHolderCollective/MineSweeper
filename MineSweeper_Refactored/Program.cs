@@ -6,7 +6,7 @@ internal class Program
     {
         GameEngine minesweeperEngine = new GameEngine();
 
-        minesweeperEngine.RunGame();
+        minesweeperEngine.Run();
     }
 
 }

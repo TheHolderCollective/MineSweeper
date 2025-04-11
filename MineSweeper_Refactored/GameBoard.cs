@@ -12,7 +12,7 @@ internal class GameBoard
         get { return _boardSize;}
     }
     
-    public GameBoard(int gameLevel)
+    public GameBoard(GameLevel gameLevel)
     {
         SetBoardParameters(gameLevel);
         choice_board = new bool[_boardSize, _boardSize];
@@ -219,7 +219,7 @@ internal class GameBoard
         }
     }
 
-    public void ResetBoard(int gameLevel)
+    public void ResetBoard(GameLevel gameLevel)
     {
         SetBoardParameters(gameLevel);
         choice_board = new bool[_boardSize, _boardSize];
@@ -321,21 +321,22 @@ internal class GameBoard
             }
         }
     }
-    private void SetBoardParameters(int gameLevel)
+    private void SetBoardParameters(GameLevel gameLevel)
     {
+
         switch (gameLevel)
         {
-            case 1:
+            case GameLevel.Beginner:
                 bombCount = (int)  BombCount.Beginner;
                 _boardSize = (int) BoardSize.Beginner;
                 break;
 
-            case 2:
+            case GameLevel.Normal:
                 bombCount = (int)  BombCount.Normal;
                 _boardSize = (int) BoardSize.Normal;
                 break;
 
-            case 3:
+            case GameLevel.Difficult :
                 bombCount = (int)  BombCount.Difficult;
                 _boardSize = (int) BoardSize.Difficult;
                 break;

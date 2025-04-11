@@ -8,9 +8,9 @@ public enum GameStatus
 }
 public enum GameLevel
 {
-    Beginner = 1,
-    Normal = 2,
-    Difficult = 3
+    Beginner,
+    Normal,
+    Difficult
 }
 
 public enum BombCount
@@ -25,4 +25,11 @@ public enum BoardSize
     Beginner = 5,
     Normal = 8,
     Difficult = 10
+}
+
+public enum MainMenuOption
+{
+    StartGame,
+    SelectLevel,
+    EndGame
 }
