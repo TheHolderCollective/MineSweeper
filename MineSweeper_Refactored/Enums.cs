@@ -13,7 +13,7 @@ public enum GameLevel
     Difficult
 }
 
-public enum BombCount
+public enum GameLevelBombCount
 {
     Beginner = 5,
     Normal = 15,
@@ -32,4 +32,16 @@ public enum MainMenuOption
     StartGame,
     SelectLevel,
     EndGame
+}
+
+public enum SquareColors // tweak these for optimal results
+{
+    Black = 16,
+    Grey = 15,
+    DarkRed = 1,
+    DarkBlue = 27,
+    DarkGreen = 2,
+    DarkYellow = 3,
+    DarkMagenta = 5,
+    DarkCyan = 6,
 }

@@ -65,9 +65,10 @@ internal class GameEngine
         {
             validInput = true;
             
-            //Console.Clear();
             gameDisplay.ShowTitle();
-            gameBoard.PrintInGameBoard(lose); // change parameter to game status for readabiity --> will change this altogether because using Spectre
+            gameDisplay.ShowGameInformation(gameBoard.BombCount, gameLevel);
+            gameDisplay.ShowGameBoard(gameBoard);
+            //gameBoard.PrintInGameBoard(lose); // change parameter to game status for readabiity --> will change this altogether because using Spectre
 
             try
             {
@@ -90,7 +91,13 @@ internal class GameEngine
 
                 if (gameOver)
                 { // add code to give reset option
-                    ExitGameAfterPlaying(ref gameBoard, GameStatus.Loss);
+
+                    PrintGameResultBannerAndBoard(gameBoard, GameStatus.Loss);
+                    continueGame = false;
+
+                    //ExitGameAfterPlaying(ref gameBoard, GameStatus.Loss);
+                    //gameDisplay.ShowGameOver();
+
                 }
                 else
                 { // add code to give reset option
@@ -99,12 +106,15 @@ internal class GameEngine
 
                     if (win)
                     {
-                        ExitGameAfterPlaying(ref gameBoard, GameStatus.Won);
+                        PrintGameResultBannerAndBoard(gameBoard, GameStatus.Loss);
+                        continueGame = false;
+                        //ExitGameAfterPlaying(ref gameBoard, GameStatus.Won);
                     }
                 }
             }
         }
         Console.ReadKey();
+        Environment.Exit(0);
     }
    
     private static void SetGameLevel()
@@ -117,9 +127,10 @@ internal class GameEngine
     private static void ExitGameAfterPlaying(ref GameBoard gameBoard ,GameStatus gameStatus)
     {
         PrintGameResultBannerAndBoard(gameBoard,gameStatus);
-        Thread.Sleep(GAME_END_SLEEP_TIME);
-        PrintGameOverBanner(gameStatus);
-        Environment.Exit(0);
+        //Thread.Sleep(GAME_END_SLEEP_TIME);
+        //PrintGameOverBanner(gameStatus);
+        //Console.ReadKey();
+       
     }
     private static (int, int) GetCellCoordinates()
     {
@@ -156,8 +167,6 @@ internal class GameEngine
 
         Console.ResetColor();
     }
-
-
 
     private static void PrintGameResultBannerAndBoard(GameBoard game_board, GameStatus game_status)
     {
