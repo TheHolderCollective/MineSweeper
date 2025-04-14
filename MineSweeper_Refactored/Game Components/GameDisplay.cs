@@ -33,7 +33,7 @@ public class GameDisplay
                            "\n[/]";
 
     private readonly string[] mainMenuOptions = new[] { "\t\t\t     Start Game", 
-                                                        "\t\t\t     Select Mode", 
+                                                        "\t\t\t     Select Level", 
                                                         "\t\t\t     Exit Game" };
 
 
@@ -42,28 +42,34 @@ public class GameDisplay
                                                          "\t\t     (10*10)  - Hard" };
 
 
+    private readonly string[] restartGameOptions = new[]  { "\t\t\t     Continue Playing",
+                                                            "\t\t\t     Return to Main Menu",                            
+                                                            "\t\t\t     Exit Game" };
+
     private readonly string gameLevelPrompt = "  Please select game difficulty:";
 
+    //private readonly string restartMenuPrompt = "Do you wish to: ";
+
+    private readonly string gameOverWin = "=================\\ !!! You Win !!! /=================";
+    private readonly string gameOverLoss = "=================\\ !!! You Lose !!! /=================";
+
+    const int titlePanelWidth = 68;
    
-    static int titlePanelWidth;
-    static int titlePanelHeight;
 
     public GameDisplay()
     {
-        titlePanelWidth = 67;
-        titlePanelHeight = 10;
-
+      
     }
 
     public void ShowTitle()
     {
         var titleWithMarkup = new Markup(gameTitle).Centered();
         var titlePanel = new Panel(titleWithMarkup).Border(BoxBorder.Double);
-        titlePanelWidth = titlePanelWidth;
+        titlePanel.Width = titlePanelWidth;
 
         AnsiConsole.Clear();
         AnsiConsole.Write(titlePanel);
-        //AnsiConsole.WriteLine();
+
     }
 
     public void ShowGameOver()
@@ -75,6 +81,7 @@ public class GameDisplay
         AnsiConsole.Write(gameOverPanel);
         AnsiConsole.WriteLine();
     }
+
     public MainMenuOption ShowMainMenu()
     {
        
@@ -97,7 +104,7 @@ public class GameDisplay
         }
         else if (gameMenu == mainMenuOptions[2])
         {
-           choice = MainMenuOption.EndGame;
+           choice = MainMenuOption.ExitGame;
         }
 
         return choice;
@@ -192,10 +199,16 @@ public class GameDisplay
                 { // write label
                     string shift;
                     if (j == 0)
-                        shift = "\t    ";
+                    {
+                        // calculate padding needed to center gameboard
+                        int padLength = (titlePanelWidth - (gameBoard.GetUpperBound(0) + 1) * 3) / 2; 
+                        shift = "".PadLeft(padLength);
+                    }
                     else
-                        shift = String.Empty; ;
-
+                    {
+                        shift = String.Empty; 
+                    }    
+                     
                     AnsiConsole.Write(shift + gameBoard[i, j]);
                 }
 
@@ -212,15 +225,66 @@ public class GameDisplay
         var gameInfoWithMarkup = new Markup("[blue]" + info + "[/]").Centered();
         var infoPanel = new Panel(gameInfoWithMarkup).Border(BoxBorder.Double);
 
-        infoPanel.Width= titlePanelWidth-1;
-        //infoPanel.Height = titlePanelHeight;
-
-        //AnsiConsole.WriteLine();
+        infoPanel.Width= titlePanelWidth;
+    
         AnsiConsole.Write(infoPanel);
         AnsiConsole.WriteLine();
 
     }
+    public RestartMenuOption ShowRestartMenu()
+    {
+        RestartMenuOption choice = RestartMenuOption.Continue;
 
+        AnsiConsole.WriteLine();
+
+        var levelMenu = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                           .Title("")
+                           .PageSize(5)
+                           .MoreChoicesText("[grey](Move up and down to select)[/]")
+                           .AddChoices(restartGameOptions));
+
+        if (levelMenu == restartGameOptions[0])
+        {
+            choice = RestartMenuOption.Continue;
+        }
+        else if (levelMenu == restartGameOptions[1])
+        {
+            choice = RestartMenuOption.GoToMainMenu;
+        }
+        else if(levelMenu == restartGameOptions[2])
+        {
+            choice = RestartMenuOption.ExitGame;
+        }
+
+        return choice;
+
+    }
+
+    public void ShowGameResult(GameStatus gameStatus)
+    {
+        string resultInfo = string.Empty;
+
+        AnsiConsole.WriteLine();
+
+        
+        switch (gameStatus)
+        {
+            case GameStatus.Won:
+                resultInfo = "[green]" + gameOverWin + "[/]";
+                break;
+            case GameStatus.Loss:
+                resultInfo = "[red]" + gameOverLoss + "[/]";
+                break;
+        }
+
+        var resultInfoWithMarkup = new Markup(resultInfo).Centered();
+        var gameResultPanel = new Panel(resultInfoWithMarkup).Border(BoxBorder.Double);
+
+        gameResultPanel.Width = titlePanelWidth;
+
+        AnsiConsole.Write(gameResultPanel);
+        AnsiConsole.WriteLine();
+    }
 
     // Helper function: get value stored in cell 
     private string ExtractCellContents(string boardCell)

@@ -4,7 +4,8 @@ public enum GameStatus
 {
     Won,
     Loss,
-    InProgress
+    InProgress, 
+    Restart
 }
 public enum GameLevel
 {
@@ -12,7 +13,19 @@ public enum GameLevel
     Normal,
     Difficult
 }
+public enum MainMenuOption
+{
+    StartGame,
+    SelectLevel,
+    ExitGame
+}
 
+public enum RestartMenuOption
+{
+    Continue,
+    GoToMainMenu,
+    ExitGame
+}
 public enum GameLevelBombCount
 {
     Beginner = 5,
@@ -27,21 +40,14 @@ public enum BoardSize
     Difficult = 10
 }
 
-public enum MainMenuOption
-{
-    StartGame,
-    SelectLevel,
-    EndGame
-}
-
 public enum SquareColors // tweak these for optimal results
 {
-    Black = 16,
-    Grey = 15,
     DarkRed = 1,
-    DarkBlue = 27,
     DarkGreen = 2,
     DarkYellow = 3,
     DarkMagenta = 5,
     DarkCyan = 6,
+    Grey = 15,
+    Black = 16,
+    DarkBlue = 27
 }

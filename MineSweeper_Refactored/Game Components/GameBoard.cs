@@ -13,7 +13,8 @@ public class GameBoard
     string hiddenCell;
 
     int bombCount;
-    int _boardSize;
+    int boardSize;
+
     bool[,] choice_board;
     char[,] game_board;
 
@@ -24,7 +25,7 @@ public class GameBoard
 
     public int BoardDimensions
     {
-        get { return _boardSize;}
+        get { return boardSize; }
     }
     
     public bool[,] ChoiceBoard
@@ -39,8 +40,8 @@ public class GameBoard
     public GameBoard(GameLevel gameLevel)
     {
         SetBoardParameters(gameLevel);
-        choice_board = new bool[_boardSize, _boardSize];
-        game_board = new char[_boardSize, _boardSize];
+        choice_board = new bool[boardSize, boardSize];
+        game_board = new char[boardSize, boardSize];
 
         visibleCellBomb = "|" + cellBomb + "|";
         hiddenCell = "|" + cellUnknown + "|";
@@ -57,9 +58,9 @@ public class GameBoard
     public bool IsGameWon() 
     {
         int cnt = 0;
-        for (int i = 0; i < _boardSize; i++)
+        for (int i = 0; i < boardSize; i++)
         {
-            for (int j = 0; j < _boardSize; j++)
+            for (int j = 0; j < boardSize; j++)
             {
                 if (choice_board[i, j] == true)
                 {
@@ -67,7 +68,7 @@ public class GameBoard
                 }
             }
         }
-        if (cnt + bombCount == (_boardSize * _boardSize))
+        if (cnt + bombCount == (boardSize * boardSize))
         {
            return true;
         }
@@ -82,7 +83,7 @@ public class GameBoard
         var gameBoard = game_board;
         var choiceBoard = choice_board;
 
-        int gameBoardSize = _boardSize + 1;
+        int gameBoardSize = boardSize + 1;
 
         string[,] exportGameBoard = new string[gameBoardSize, gameBoardSize];
 
@@ -150,7 +151,7 @@ public class GameBoard
     public void PrintInGameBoard(bool loss_status)
     {
         // print numbered headers
-        for (int k = 0; k < _boardSize; k++)
+        for (int k = 0; k < boardSize; k++)
         {
             if (k == 0)
                 Console.Write($"    {k + 1}");
@@ -163,9 +164,9 @@ public class GameBoard
         }
         Console.WriteLine();
 
-        for (int i = 0; i < _boardSize; i++)
+        for (int i = 0; i < boardSize; i++)
         {
-            for (int j = 0; j < _boardSize; j++)
+            for (int j = 0; j < boardSize; j++)
             {
                 if (j == 0 && i != 9) // this bit of code takes into account the change for the double digit
                     Console.Write($" {i + 1} ");
@@ -224,9 +225,9 @@ public class GameBoard
 
     public void PrintFinalResultsGameBoard()
     {
-        for (int i = 0; i < _boardSize; i++)
+        for (int i = 0; i < boardSize; i++)
         {
-            for (int j = 0; j < _boardSize; j++)
+            for (int j = 0; j < boardSize; j++)
             {
                 Console.Write($"|{game_board[i, j]}|");
             }
@@ -241,7 +242,7 @@ public class GameBoard
 
     public bool IsCellOutOfBounds((int x, int y) inputCell)
     {
-        return (inputCell.x < 1 || inputCell.x > _boardSize || inputCell.y < 1 || inputCell.y > _boardSize);
+        return (inputCell.x < 1 || inputCell.x > boardSize || inputCell.y < 1 || inputCell.y > boardSize);
     }
     public void UpdateBoard((int x, int y) inputCell)
     {
@@ -263,7 +264,7 @@ public class GameBoard
                 }
             }
 
-            if (x > 0 && y < _boardSize - 1)
+            if (x > 0 && y < boardSize - 1)
             {
                 if (game_board[x - 1, y + 1] != cellBomb)
                 {
@@ -290,7 +291,7 @@ public class GameBoard
                 }
             }
 
-            if (y < _boardSize - 1)
+            if (y < boardSize - 1)
             {
                 if (game_board[x, y + 1] != cellBomb)
                 {
@@ -299,7 +300,7 @@ public class GameBoard
                 }
             }
 
-            if (x < _boardSize - 1 && y < _boardSize - 1)
+            if (x < boardSize - 1 && y < boardSize - 1)
             {
                 if (game_board[x + 1, y + 1] != cellBomb)
                 {
@@ -308,7 +309,7 @@ public class GameBoard
                 }
             }
 
-            if (x < _boardSize - 1 && y > 0)
+            if (x < boardSize - 1 && y > 0)
             {
                 if (game_board[x + 1, y - 1] != cellBomb)
                 {
@@ -322,9 +323,11 @@ public class GameBoard
     public void ResetBoard(GameLevel gameLevel)
     {
         SetBoardParameters(gameLevel);
-        choice_board = new bool[_boardSize, _boardSize];
-        game_board = new char[_boardSize, _boardSize];
+        choice_board = new bool[boardSize, boardSize];
+        game_board = new char[boardSize, boardSize];
+        Initialise();
     }
+
     private void SetBombs()
     {
         Random rand = new Random();
@@ -336,8 +339,8 @@ public class GameBoard
         {
             do
             {
-                x = rand.Next(0, _boardSize);
-                y = rand.Next(0, _boardSize);
+                x = rand.Next(0, boardSize);
+                y = rand.Next(0, boardSize);
                 //Console.WriteLine($"{x},{y}");
             } while (game_board[x, y] == cellBomb);
             game_board[x, y] = cellBomb;
@@ -348,9 +351,9 @@ public class GameBoard
     private void SetEmptyCells()
     {
         // place spaces which represent cells
-        for (int i = 0; i < _boardSize; i++)
+        for (int i = 0; i < boardSize; i++)
         {
-            for (int j = 0; j < _boardSize; j++)
+            for (int j = 0; j < boardSize; j++)
             {
                 if (game_board[i, j] != cellBomb)
                 {
@@ -364,9 +367,9 @@ public class GameBoard
     private void SetBombCounts()
     {
         int num_bomb = 0;
-        for (int i = 0; i < _boardSize; i++)
+        for (int i = 0; i < boardSize; i++)
         {
-            for (int j = 0; j < _boardSize; j++)
+            for (int j = 0; j < boardSize; j++)
             {
                 // count the number of bombs adjacent to every square
                 if (game_board[i, j] != cellBomb)
@@ -375,7 +378,7 @@ public class GameBoard
                     {
                         num_bomb++;
                     }
-                    if (i > 0 && j < _boardSize - 1 && game_board[i - 1, j + 1] == cellBomb) // East North neighbor
+                    if (i > 0 && j < boardSize - 1 && game_board[i - 1, j + 1] == cellBomb) // East North neighbor
                     {
                         num_bomb++;
                     }
@@ -390,21 +393,21 @@ public class GameBoard
                         num_bomb++;
                     }
 
-                    if (j < _boardSize - 1 && game_board[i, j + 1] == cellBomb) // East neighbor
+                    if (j < boardSize - 1 && game_board[i, j + 1] == cellBomb) // East neighbor
                     {
                         num_bomb++;
                     }
 
-                    if (i < _boardSize - 1 && j < _boardSize - 1 && game_board[i + 1, j + 1] == cellBomb) // South neighbor
+                    if (i < boardSize - 1 && j < boardSize - 1 && game_board[i + 1, j + 1] == cellBomb) // South neighbor
                     {
                         num_bomb++;
                     }
 
-                    if (i < _boardSize - 1 && j > 0 && game_board[i + 1, j - 1] == cellBomb) // West South neighbor
+                    if (i < boardSize - 1 && j > 0 && game_board[i + 1, j - 1] == cellBomb) // West South neighbor
                     {
                         num_bomb++;
                     }
-                    if (i < _boardSize - 1 && game_board[i + 1, j] == cellBomb) // South
+                    if (i < boardSize - 1 && game_board[i + 1, j] == cellBomb) // South
                     {
                         num_bomb++;
                     }
@@ -428,22 +431,22 @@ public class GameBoard
         {
             case GameLevel.Beginner:
                 bombCount = (int) GameLevelBombCount.Beginner;
-                _boardSize = (int) BoardSize.Beginner;
+                boardSize = (int) BoardSize.Beginner;
                 break;
 
             case GameLevel.Normal:
                 bombCount = (int) GameLevelBombCount.Normal;
-                _boardSize = (int) BoardSize.Normal;
+                boardSize = (int) BoardSize.Normal;
                 break;
 
             case GameLevel.Difficult :
                 bombCount = (int) GameLevelBombCount.Difficult;
-                _boardSize = (int) BoardSize.Difficult;
+                boardSize = (int) BoardSize.Difficult;
                 break;
 
             default:
                 bombCount = (int) GameLevelBombCount.Normal;
-                _boardSize = (int) BoardSize.Normal;
+                boardSize = (int) BoardSize.Normal;
                 break;
         }
     }
