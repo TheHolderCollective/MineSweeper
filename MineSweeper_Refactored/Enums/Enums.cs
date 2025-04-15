@@ -1,10 +1,9 @@
-﻿namespace MineSweeper_Refactored;
-
+﻿namespace MineSweeper;
 public enum GameStatus
 {
     Won,
     Loss,
-    InProgress, 
+    InProgress,
     Restart
 }
 public enum GameLevel
@@ -40,7 +39,7 @@ public enum BoardSize
     Difficult = 10
 }
 
-public enum SquareColors // tweak these for optimal results
+public enum SquareColors 
 {
     DarkRed = 1,
     DarkGreen = 2,

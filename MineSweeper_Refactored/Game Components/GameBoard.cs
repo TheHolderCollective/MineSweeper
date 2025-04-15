@@ -1,23 +1,18 @@
-﻿namespace MineSweeper_Refactored;
+﻿namespace MineSweeper;
 
 public class GameBoard
 {
-    private readonly char cellBomb = '*';
-    private readonly char cellEmpty = ' ';
-    private readonly char cellUnknown = '?';
-
+    
     const int ColumnLabelRow = 0;
     const int RowLabelColumn = 0;
-    
-    string visibleCellBomb;
-    string hiddenCell;
-
+   
     int bombCount;
     int boardSize;
 
     bool[,] choice_board;
     char[,] game_board;
 
+    GameBoardElement boardElement;
     public int BombCount
     {
         get { return bombCount; }
@@ -42,12 +37,8 @@ public class GameBoard
         SetBoardParameters(gameLevel);
         choice_board = new bool[boardSize, boardSize];
         game_board = new char[boardSize, boardSize];
-
-        visibleCellBomb = "|" + cellBomb + "|";
-        hiddenCell = "|" + cellUnknown + "|";
-
+        boardElement = new GameBoardElement();
     }
-
     public void Initialise()
     {
         SetBombs();
@@ -91,17 +82,27 @@ public class GameBoard
         // write headers
         for (int boardColumn = 0; boardColumn < gameBoardSize; boardColumn++)
         {
-            if (boardColumn == 0)
+            if (boardColumn == 0) 
             {
-                exportGameBoard[ColumnLabelRow, ColumnLabelRow] = String.Format($"{cellEmpty}{cellEmpty}");
+                exportGameBoard[ColumnLabelRow, ColumnLabelRow] = String.Format($"{boardElement.EmptyCell}{boardElement.EmptyCell}");
             }
-            else if (boardColumn == gameBoardSize - 1)
-            {
-                exportGameBoard[ColumnLabelRow, boardColumn] = String.Format($"  {boardColumn}\n");
-            }
-            else
+            else if (boardColumn <= 9)
             {
                 exportGameBoard[ColumnLabelRow, boardColumn] = String.Format($"  {boardColumn}");
+
+                if (boardColumn == 9) // extra space after 9 ensures correct positioning of remaining numbers
+                {
+                    exportGameBoard[ColumnLabelRow, boardColumn] = exportGameBoard[ColumnLabelRow, boardColumn] + " ";
+                }
+            }
+            else if (boardColumn >= 9 && boardColumn < gameBoardSize)
+            {
+                exportGameBoard[ColumnLabelRow, boardColumn] = String.Format($" {boardColumn}");
+            }
+
+            if (boardColumn == gameBoardSize - 1) // new line needed on last number
+            {
+                exportGameBoard[ColumnLabelRow, boardColumn] = exportGameBoard[ColumnLabelRow, boardColumn] + "\n";
             }
 
         }
@@ -129,10 +130,10 @@ public class GameBoard
                     // prints actual cells from gameboard based on choiceboard
                     if (choiceBoard[boardRow - 1, boardColumn - 1] == false)
                     {
-                        exportGameBoard[boardRow, boardColumn] = String.Format($"{hiddenCell}");
+                        exportGameBoard[boardRow, boardColumn] = String.Format($"{boardElement.HiddenCell}");
 
                     }
-                    else if ((choiceBoard[boardRow - 1, boardColumn - 1] == true) && (gameBoard[boardRow - 1, boardColumn - 1] != cellBomb))
+                    else if ((choiceBoard[boardRow - 1, boardColumn - 1] == true) && (gameBoard[boardRow - 1, boardColumn - 1] != boardElement.CellBomb))
                     {
                         exportGameBoard[boardRow, boardColumn] = String.Format($"|{gameBoard[boardRow - 1, boardColumn - 1]}|");
                     }
@@ -148,96 +149,79 @@ public class GameBoard
 
         return exportGameBoard;
     }
-    public void PrintInGameBoard(bool loss_status)
+
+    public string[,] ExportUnmaskedGameBoard()
     {
-        // print numbered headers
-        for (int k = 0; k < boardSize; k++)
-        {
-            if (k == 0)
-                Console.Write($"    {k + 1}");
-            else if (k != 9)
-                Console.Write($"  {k + 1}");
-            else if (k == 8)
-                Console.Write($" {k + 1} ");
-            else
-                Console.Write($"  {k + 1}");
-        }
-        Console.WriteLine();
+        var gameBoard = game_board;
+        var choiceBoard = choice_board;
 
-        for (int i = 0; i < boardSize; i++)
+        int gameBoardSize = boardSize + 1;
+
+        string[,] exportGameBoard = new string[gameBoardSize, gameBoardSize];
+
+        // write headers
+        for (int boardColumn = 0; boardColumn < gameBoardSize; boardColumn++)
         {
-            for (int j = 0; j < boardSize; j++)
+            if (boardColumn == 0)
             {
-                if (j == 0 && i != 9) // this bit of code takes into account the change for the double digit
-                    Console.Write($" {i + 1} ");
-                else if (i == 9 && j == 0)
-                    Console.Write($"{i + 1} ");
+                exportGameBoard[ColumnLabelRow, ColumnLabelRow] = String.Format($"{boardElement.EmptyCell}{boardElement.EmptyCell}");
+            }
+            else if (boardColumn <= 9)
+            {
+                exportGameBoard[ColumnLabelRow, boardColumn] = String.Format($"  {boardColumn}");
 
-                //print bomb if lose
-                if (game_board[i, j] == cellBomb && loss_status)
+                if (boardColumn == 9) // extra space after 9 ensures correct positioning of remaining numbers
                 {
-                    Console.Write($"{visibleCellBomb}");
+                    exportGameBoard[ColumnLabelRow, boardColumn] = exportGameBoard[ColumnLabelRow, boardColumn] + " ";
                 }
-                // print "?" 
-                else if ((game_board[i, j] == cellBomb && !loss_status) || (game_board[i, j] == cellEmpty && choice_board[i, j] == false) || (game_board[i, j] != cellBomb && game_board[i, j] != cellEmpty && choice_board[i, j] == false))
+            }
+            else if (boardColumn >= 9 && boardColumn < gameBoardSize)
+            {
+                exportGameBoard[ColumnLabelRow, boardColumn] = String.Format($" {boardColumn}");
+            }
+
+            if (boardColumn == gameBoardSize - 1) // new line needed on last number
+            {
+                exportGameBoard[ColumnLabelRow, boardColumn] = exportGameBoard[ColumnLabelRow, boardColumn] + "\n";
+            }
+
+        }
+
+        // write rows
+        for (int boardRow = 1; boardRow < gameBoardSize; boardRow++)
+        {
+            for (int boardColumn = 0; boardColumn < gameBoardSize; boardColumn++)
+            {
+                // prints row labels
+                if (boardColumn == RowLabelColumn)
                 {
-                    Console.Write($"{hiddenCell}");
-                }
-                // print adjacent bomb count if selected
-                else if (game_board[i, j] != cellBomb && choice_board[i, j] == true)
-                {
-                    if (game_board[i, j] != cellEmpty)
+                    if (boardRow <= 9)
                     {
-                        int bombCount = Int32.Parse(game_board[i, j].ToString());
-
-                        switch (bombCount)
-                        {
-                            case 1:
-                                Console.ForegroundColor = ConsoleColor.DarkBlue;
-                                break;
-                            case 2:
-                                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                                break;
-                            case 3:
-                                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                                break;
-                            case 4:
-                                Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                                break;
-                            case 5:
-                                Console.ForegroundColor = ConsoleColor.DarkRed;
-                                break;
-                            case 6:
-                                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                                break;
-                            default:
-                                Console.ForegroundColor = ConsoleColor.DarkGray;
-                                break;
-                        }
+                        exportGameBoard[boardRow, RowLabelColumn] = String.Format($" {boardRow} ");
                     }
-                    Console.Write($"|{game_board[i, j]}|");
-                    Console.ResetColor();
+                    else
+                    {
+                        exportGameBoard[boardRow, RowLabelColumn] = String.Format($"{boardRow} ");
+                    }
+
+                }
+                else
+                {
+                    exportGameBoard[boardRow, boardColumn] = String.Format($"|{game_board[boardRow-1, boardColumn-1]}|");
+
+                    if (boardColumn == gameBoardSize - 1)
+                    {
+                        exportGameBoard[boardRow, boardColumn] = exportGameBoard[boardRow, boardColumn] + "\n";
+                    }
                 }
             }
-            Console.WriteLine();
         }
-    }
 
-    public void PrintFinalResultsGameBoard()
-    {
-        for (int i = 0; i < boardSize; i++)
-        {
-            for (int j = 0; j < boardSize; j++)
-            {
-                Console.Write($"|{game_board[i, j]}|");
-            }
-            Console.WriteLine();
-        }
+        return exportGameBoard;
     }
-
     public bool IsCellBomb((int x,int y) inputCell)
     {
-        return (game_board[inputCell.x - 1, inputCell.y - 1] == cellBomb) ? true : false;
+        return (game_board[inputCell.x - 1, inputCell.y - 1] == boardElement.CellBomb) ? true : false;
     }
 
     public bool IsCellOutOfBounds((int x, int y) inputCell)
@@ -251,13 +235,13 @@ public class GameBoard
 
         if (choice_board[x, y] == false)
         {
-            if (game_board[x, y] != cellBomb)
+            if (game_board[x, y] != boardElement.CellBomb)
             {
                 choice_board[x, y] = true;
             }
             if (x > 0)
             {
-                if (game_board[x - 1, y] != cellBomb)
+                if (game_board[x - 1, y] != boardElement.CellBomb)
                 {
                     choice_board[x - 1, y] = true;
 
@@ -266,7 +250,7 @@ public class GameBoard
 
             if (x > 0 && y < boardSize - 1)
             {
-                if (game_board[x - 1, y + 1] != cellBomb)
+                if (game_board[x - 1, y + 1] != boardElement.CellBomb)
                 {
                     choice_board[x - 1, y + 1] = true;
 
@@ -275,7 +259,7 @@ public class GameBoard
 
             if (x > 0 && y > 0)
             {
-                if (game_board[x - 1, y - 1] != cellBomb)
+                if (game_board[x - 1, y - 1] != boardElement.CellBomb)
                 {
                     choice_board[x - 1, y - 1] = true;
 
@@ -284,7 +268,7 @@ public class GameBoard
 
             if (y > 0)
             {
-                if (game_board[x, y - 1] != cellBomb)
+                if (game_board[x, y - 1] != boardElement.CellBomb)
                 {
                     choice_board[x, y - 1] = true;
 
@@ -293,7 +277,7 @@ public class GameBoard
 
             if (y < boardSize - 1)
             {
-                if (game_board[x, y + 1] != cellBomb)
+                if (game_board[x, y + 1] != boardElement.CellBomb)
                 {
                     choice_board[x, y + 1] = true;
 
@@ -302,7 +286,7 @@ public class GameBoard
 
             if (x < boardSize - 1 && y < boardSize - 1)
             {
-                if (game_board[x + 1, y + 1] != cellBomb)
+                if (game_board[x + 1, y + 1] != boardElement.CellBomb)
                 {
                     choice_board[x + 1, y + 1] = true;
 
@@ -311,7 +295,7 @@ public class GameBoard
 
             if (x < boardSize - 1 && y > 0)
             {
-                if (game_board[x + 1, y - 1] != cellBomb)
+                if (game_board[x + 1, y - 1] != boardElement.CellBomb)
                 {
                     choice_board[x + 1, y - 1] = true;
 
@@ -341,9 +325,9 @@ public class GameBoard
             {
                 x = rand.Next(0, boardSize);
                 y = rand.Next(0, boardSize);
-                //Console.WriteLine($"{x},{y}");
-            } while (game_board[x, y] == cellBomb);
-            game_board[x, y] = cellBomb;
+               
+            } while (game_board[x, y] == boardElement.CellBomb);
+            game_board[x, y] = boardElement.CellBomb;
             numBombs--;
         }
     }
@@ -355,9 +339,9 @@ public class GameBoard
         {
             for (int j = 0; j < boardSize; j++)
             {
-                if (game_board[i, j] != cellBomb)
+                if (game_board[i, j] != boardElement.CellBomb)
                 {
-                    game_board[i, j] = cellEmpty;
+                    game_board[i, j] = boardElement.EmptyCell;
                 }
                 choice_board[i, j] = false;
             }
@@ -372,42 +356,42 @@ public class GameBoard
             for (int j = 0; j < boardSize; j++)
             {
                 // count the number of bombs adjacent to every square
-                if (game_board[i, j] != cellBomb)
+                if (game_board[i, j] != boardElement.CellBomb)
                 {
-                    if (i > 0 && game_board[i - 1, j] == cellBomb) // North neighbor
+                    if (i > 0 && game_board[i - 1, j] == boardElement.CellBomb) // North neighbor
                     {
                         num_bomb++;
                     }
-                    if (i > 0 && j < boardSize - 1 && game_board[i - 1, j + 1] == cellBomb) // East North neighbor
-                    {
-                        num_bomb++;
-                    }
-
-                    if (i > 0 && j > 0 && game_board[i - 1, j - 1] == cellBomb) // West North neighbor
+                    if (i > 0 && j < boardSize - 1 && game_board[i - 1, j + 1] == boardElement.CellBomb) // East North neighbor
                     {
                         num_bomb++;
                     }
 
-                    if (j > 0 && game_board[i, j - 1] == cellBomb) // West neighbor
+                    if (i > 0 && j > 0 && game_board[i - 1, j - 1] == boardElement.CellBomb) // West North neighbor
                     {
                         num_bomb++;
                     }
 
-                    if (j < boardSize - 1 && game_board[i, j + 1] == cellBomb) // East neighbor
+                    if (j > 0 && game_board[i, j - 1] == boardElement.CellBomb) // West neighbor
                     {
                         num_bomb++;
                     }
 
-                    if (i < boardSize - 1 && j < boardSize - 1 && game_board[i + 1, j + 1] == cellBomb) // South neighbor
+                    if (j < boardSize - 1 && game_board[i, j + 1] == boardElement.CellBomb) // East neighbor
                     {
                         num_bomb++;
                     }
 
-                    if (i < boardSize - 1 && j > 0 && game_board[i + 1, j - 1] == cellBomb) // West South neighbor
+                    if (i < boardSize - 1 && j < boardSize - 1 && game_board[i + 1, j + 1] == boardElement.CellBomb) // South neighbor
                     {
                         num_bomb++;
                     }
-                    if (i < boardSize - 1 && game_board[i + 1, j] == cellBomb) // South
+
+                    if (i < boardSize - 1 && j > 0 && game_board[i + 1, j - 1] == boardElement.CellBomb) // West South neighbor
+                    {
+                        num_bomb++;
+                    }
+                    if (i < boardSize - 1 && game_board[i + 1, j] == boardElement.CellBomb) // South
                     {
                         num_bomb++;
                     }
@@ -450,6 +434,4 @@ public class GameBoard
                 break;
         }
     }
-
-
 }

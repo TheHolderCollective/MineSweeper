@@ -1,4 +1,4 @@
-﻿namespace MineSweeper_Refactored;
+﻿namespace MineSweeper;
 
 public class GameEngine
 {
@@ -56,10 +56,13 @@ public class GameEngine
         {
             gameDisplay.ShowTitle();
             gameDisplay.ShowGameInformation(gameBoard.BombCount, gameLevel);
-            gameDisplay.ShowGameBoard(gameBoard);
+            gameDisplay.ShowGameBoard(gameBoard, gameStatus);
 
             try
             {
+                // for testing only
+                //Console.Write($"\nLast cell: {cell.x},{cell.y}");
+                //
                 cell = GetCellCoordinates();
                 validInput = gameBoard.IsCellOutOfBounds(cell) ? false : true;
             }
@@ -83,7 +86,7 @@ public class GameEngine
                 {
                     gameDisplay.ShowTitle();
                     gameDisplay.ShowGameInformation(gameBoard.BombCount, gameLevel);
-                    gameDisplay.ShowGameBoard(gameBoard); // replace this with show result gameboard
+                    gameDisplay.ShowGameBoard(gameBoard, gameStatus); 
                     gameDisplay.ShowGameResult(gameStatus);
 
                     Console.ReadKey();

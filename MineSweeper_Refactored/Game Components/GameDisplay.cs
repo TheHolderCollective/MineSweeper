@@ -1,13 +1,9 @@
 ﻿using Spectre.Console;
-namespace MineSweeper_Refactored;
+namespace MineSweeper;
 
 public class GameDisplay
 {
-    private readonly char cellBomb = '*';
-    private readonly char cellEmpty = ' ';
-    private readonly char cellUnknown = '?';
-
-
+   
     private readonly string gameTitle = "[blue]\n" +
                            "   /\\/\\ (_)_ __   ___  _____      _____  ___ _ __   ___ _ __ \n" +
                            "  /    \\| | '_ \\ / _ \\/ __\\ \\ /\\ / / _ \\/ _ \\ '_ \\ / _ \\ '__|\n" +
@@ -15,14 +11,6 @@ public class GameDisplay
                            "\\/    \\/_|_| |_|\\___||___/ \\_/\\_/ \\___|\\___| .__/ \\___|_|  \n" +
                            "                                            |_|               \n" +
                            "[/]";
-
-     private readonly string gameTitle2 = "[blue]" +
-                                  "         _____ _                                             \n" +
-                                  "        |     |_|___ ___ ___ _ _ _ ___ ___ ___ ___ ___       \n" +
-                                  "        | | | | |   | -_|_ -| | | | -_| -_| . | -_|  _|      \n" +
-                                  "        |_|_|_|_|_|_|___|___|_____|___|___|  _|___|_|        \n" +
-                                  "                                          |_|                \n" +
-                                  "[/]";
 
     private readonly string gameOver = "[blue]" + 
         @"   ___                         ___                
@@ -48,17 +36,16 @@ public class GameDisplay
 
     private readonly string gameLevelPrompt = "  Please select game difficulty:";
 
-    //private readonly string restartMenuPrompt = "Do you wish to: ";
-
     private readonly string gameOverWin = "=================\\ !!! You Win !!! /=================";
     private readonly string gameOverLoss = "=================\\ !!! You Lose !!! /=================";
 
     const int titlePanelWidth = 68;
-   
+
+    GameBoardElement boardElement;
 
     public GameDisplay()
     {
-      
+        boardElement = new GameBoardElement();
     }
 
     public void ShowTitle()
@@ -137,12 +124,19 @@ public class GameDisplay
         return choice;
     }
 
-    public void ShowGameBoard(GameBoard board)
+    public void ShowGameBoard(GameBoard board, GameStatus gameStatus)
     {
         var gameBoard = board.ExportInPlayGameBoard();
 
+        switch (gameStatus)
+        {
+            case GameStatus.Won:
+            case GameStatus.Loss:
+                gameBoard = board.ExportUnmaskedGameBoard();
+                break;
+        }
+     
         // display actual board
-      
         for (int i = 0; i <= gameBoard.GetUpperBound(0); i++)
         {
             for (int j = 0; j <= gameBoard.GetUpperBound(1); j++)
@@ -152,10 +146,25 @@ public class GameDisplay
                     // all squares will have a default background colour of grey
                     string cellContents = ExtractCellContents(gameBoard[i, j]);
 
-                    if ((cellContents[0] == cellUnknown) || (cellContents[0] == cellEmpty))
+                    if ((cellContents[0] == boardElement.UnknownCell) || (cellContents[0] == boardElement.EmptyCell))
                     {
                         AnsiConsole.Background = Color.FromInt32((int)SquareColors.Grey);
                         AnsiConsole.Foreground = Color.FromInt32((int)SquareColors.Black);
+                    }
+                    else if (cellContents[0] == boardElement.CellBomb)
+                    {
+                        switch (gameStatus)
+                        {
+                            case GameStatus.Won:
+                                AnsiConsole.Background = Color.FromInt32((int)SquareColors.DarkGreen);
+                                AnsiConsole.Foreground = Color.FromInt32((int)SquareColors.Black);
+                                break;
+                            case GameStatus.Loss:
+                                AnsiConsole.Background = Color.FromInt32((int)SquareColors.DarkRed);
+                                AnsiConsole.Foreground = Color.FromInt32((int)SquareColors.Black);
+                                break;
+                        }
+                        
                     }
                     else
                     {
@@ -201,7 +210,8 @@ public class GameDisplay
                     if (j == 0)
                     {
                         // calculate padding needed to center gameboard
-                        int padLength = (titlePanelWidth - (gameBoard.GetUpperBound(0) + 1) * 3) / 2; 
+                        int padLength = (titlePanelWidth - (gameBoard.GetUpperBound(0) + 1) * 3) / 2;
+                        if (padLength < 0) padLength = 0;
                         shift = "".PadLeft(padLength);
                     }
                     else

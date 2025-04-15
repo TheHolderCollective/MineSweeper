@@ -1,6 +1,6 @@
-﻿namespace MineSweeper_Refactored;
+﻿namespace MineSweeper;
 
-internal class Program
+public class Program
 {
     static void Main(string[] args)
     {
