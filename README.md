@@ -1,7 +1,7 @@
 # Introduction
 This is a simple minesweeper console application which is a modification of this [project](https://github.com/FarzadForuozanfar/MineSweeper).
 
-The code was refactored to use classes, and the [Spectre Console library](https://spectreconsole.net/) was used to improve the interface.
+The code was refactored to use classes, and the [Spectre.Console](https://spectreconsole.net/) library was used to improve the interface.
 
 # Description
 The game has three levels which can be selected by choosing the option 'Select Level' from the main menu:
@@ -10,11 +10,11 @@ The game has three levels which can be selected by choosing the option 'Select L
 
 ![image](https://github.com/user-attachments/assets/43ffaa2f-fd6a-4ca7-adf6-7a6044a4be30)
 
-# How to Play
 The game is no flags which means the game will be won once all cells which don't contain mines are revealed:
 
 ![image](https://github.com/user-attachments/assets/07f41ce9-4f0d-44f4-8674-4da72e1db1de)
 
+# How to Play
 Cells can be selected by entering the coordinates with a comma separator between the numbers as shown below:
 
 ![image](https://github.com/user-attachments/assets/2e597924-a564-497f-891e-171c96a232ea)
