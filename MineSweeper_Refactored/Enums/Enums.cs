@@ -29,6 +29,12 @@ public enum RestartMenuOption
     ExitGame
 }
 
+public enum MenuType
+{
+    MainMenu,
+    GameLevelMenu,
+    RestartMenu
+}
 public enum GameLevelBombs
 {
     Beginner = 5,

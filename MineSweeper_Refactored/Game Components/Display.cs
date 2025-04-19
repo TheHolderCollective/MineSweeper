@@ -73,30 +73,43 @@ public class Display
 
     public int ShowMainMenu()
     {
-        AnsiConsole.WriteLine();
-
-        int choice = mainMenu.ShowMenu();
-
-        return choice;
+        return ShowMenu(MenuType.MainMenu);
     }
 
     public int ShowLevelMenu()
     {
-        AnsiConsole.WriteLine();
-
-        int choice = gameLevelMenu.ShowMenu();
-
-        return choice;
+        return ShowMenu(MenuType.GameLevelMenu);
     }
 
     public int ShowRestartMenu()
     {
+        return ShowMenu(MenuType.RestartMenu);
+    }
+
+    private int ShowMenu(MenuType menuType)
+    {
+        int choice = 0;
+
         AnsiConsole.WriteLine();
 
-        int choice = restartMenu.ShowMenu();
+        switch (menuType)
+        {
+            case MenuType.MainMenu:
+                choice = mainMenu.ShowMenu();
+                break;
+            case MenuType.GameLevelMenu:
+                choice = gameLevelMenu.ShowMenu();
+                break;
+            case MenuType.RestartMenu:
+                choice = restartMenu.ShowMenu();
+                break;
+            default:
+                break;
+        }
 
         return choice;
     }
+
     public void ShowGameBoard(Board board, GameStatus gameStatus)
     {
         var gameBoard = board.ExportInPlayGameBoard();
