@@ -4,7 +4,7 @@ public class Program
 {
     static void Main(string[] args)
     {
-        GameEngine minesweeperEngine = new GameEngine();
+        Engine minesweeperEngine = new Engine();
 
         minesweeperEngine.Run();
     }

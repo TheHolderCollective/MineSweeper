@@ -1,19 +1,19 @@
 ﻿namespace MineSweeper;
 
-public class GameEngine
+public class Engine
 {
     static (int x, int y) cell;
-    static GameBoard? gameBoard;
+    static Board? gameBoard;
     static GameLevel gameLevel;
 
-    static GameDisplay? gameDisplay;
+    static Display? gameDisplay;
     static MainMenuOption menuOption;
     static RestartMenuOption restartOption;
 
-    public GameEngine()
+    public Engine()
     {
         gameLevel = GameLevel.Normal; // set normal as default
-        gameDisplay = new GameDisplay();
+        gameDisplay = new Display();
         Console.Clear();
     }
     public void Run()
@@ -23,7 +23,7 @@ public class GameEngine
         while (continueGame)
         {
             gameDisplay.ShowTitle();
-            menuOption = gameDisplay.ShowMainMenu();
+            menuOption = (MainMenuOption) gameDisplay.ShowMainMenu();
 
             switch (menuOption)
             {
@@ -35,6 +35,8 @@ public class GameEngine
                     break;
                 case MainMenuOption.ExitGame:
                     continueGame = false;
+                    break;
+                default:
                     break;
             }
         }
@@ -48,10 +50,8 @@ public class GameEngine
         GameStatus gameStatus = GameStatus.InProgress;
         bool validInput;
         
-        gameBoard = new GameBoard(gameLevel);
-        gameBoard.Initialise();
-
-
+        gameBoard = new Board(gameLevel);
+      
         while (gameStatus == GameStatus.InProgress)
         {
             gameDisplay.ShowTitle();
@@ -91,7 +91,7 @@ public class GameEngine
 
                     Console.ReadKey();
                     gameDisplay.ShowTitle();
-                    restartOption = gameDisplay.ShowRestartMenu();
+                    restartOption = (RestartMenuOption) gameDisplay.ShowRestartMenu();
 
                     switch (restartOption)
                     {
@@ -119,7 +119,7 @@ public class GameEngine
     private static void SetGameLevel()
     {
         gameDisplay.ShowTitle();
-        gameLevel = gameDisplay.ShowLevelMenu();
+        gameLevel = (GameLevel) gameDisplay.ShowLevelMenu();
 
     }
 

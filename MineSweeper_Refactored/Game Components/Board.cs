@@ -1,6 +1,6 @@
 ﻿namespace MineSweeper;
 
-public class GameBoard
+public class Board
 {
     
     const int ColumnLabelRow = 0;
@@ -12,7 +12,7 @@ public class GameBoard
     bool[,] choice_board;
     char[,] game_board;
 
-    GameBoardElement boardElement;
+    BoardElement boardElement;
     public int BombCount
     {
         get { return bombCount; }
@@ -32,12 +32,13 @@ public class GameBoard
     {
         get { return game_board; }
     }
-    public GameBoard(GameLevel gameLevel)
+    public Board(GameLevel gameLevel)
     {
         SetBoardParameters(gameLevel);
         choice_board = new bool[boardSize, boardSize];
         game_board = new char[boardSize, boardSize];
-        boardElement = new GameBoardElement();
+        boardElement = new BoardElement();
+        Initialise();
     }
     public void Initialise()
     {
@@ -414,22 +415,22 @@ public class GameBoard
         switch (gameLevel)
         {
             case GameLevel.Beginner:
-                bombCount = (int) GameLevelBombCount.Beginner;
+                bombCount = (int) GameLevelBombs.Beginner;
                 boardSize = (int) BoardSize.Beginner;
                 break;
 
             case GameLevel.Normal:
-                bombCount = (int) GameLevelBombCount.Normal;
+                bombCount = (int) GameLevelBombs.Normal;
                 boardSize = (int) BoardSize.Normal;
                 break;
 
             case GameLevel.Difficult :
-                bombCount = (int) GameLevelBombCount.Difficult;
+                bombCount = (int) GameLevelBombs.Difficult;
                 boardSize = (int) BoardSize.Difficult;
                 break;
 
             default:
-                bombCount = (int) GameLevelBombCount.Normal;
+                bombCount = (int) GameLevelBombs.Normal;
                 boardSize = (int) BoardSize.Normal;
                 break;
         }

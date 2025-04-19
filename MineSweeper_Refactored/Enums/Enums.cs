@@ -1,4 +1,5 @@
 ﻿namespace MineSweeper;
+
 public enum GameStatus
 {
     Won,
@@ -6,12 +7,14 @@ public enum GameStatus
     InProgress,
     Restart
 }
+
 public enum GameLevel
 {
     Beginner,
     Normal,
     Difficult
 }
+
 public enum MainMenuOption
 {
     StartGame,
@@ -25,7 +28,8 @@ public enum RestartMenuOption
     GoToMainMenu,
     ExitGame
 }
-public enum GameLevelBombCount
+
+public enum GameLevelBombs
 {
     Beginner = 5,
     Normal = 15,

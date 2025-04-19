@@ -1,6 +1,6 @@
 ﻿namespace MineSweeper
 {
-    public class GameBoardElement
+    public class BoardElement
     {
         private string cellBomb; 
         private string cellEmpty;
@@ -46,7 +46,7 @@
                 return cellUnknown[0];
             }
         }
-        public GameBoardElement()
+        public BoardElement()
         {
             cellBomb = "*"; 
             cellEmpty = " ";
@@ -54,7 +54,7 @@
             cellBorder = "|";
         }
 
-        public GameBoardElement(char bombChar, char cellBorderChar, char hiddenCellChar)
+        public BoardElement(char bombChar, char cellBorderChar, char hiddenCellChar)
         {
             cellBomb = bombChar.ToString();
             cellBorder = cellBorderChar.ToString();

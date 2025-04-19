@@ -1,9 +1,9 @@
 ﻿using Spectre.Console;
+using MineSweeper.Menu_Components;
 namespace MineSweeper;
 
-public class GameDisplay
+public class Display
 {
-   
     private readonly string gameTitle = "[blue]\n" +
                            "   /\\/\\ (_)_ __   ___  _____      _____  ___ _ __   ___ _ __ \n" +
                            "  /    \\| | '_ \\ / _ \\/ __\\ \\ /\\ / / _ \\/ _ \\ '_ \\ / _ \\ '__|\n" +
@@ -12,13 +12,8 @@ public class GameDisplay
                            "                                            |_|               \n" +
                            "[/]";
 
-    private readonly string gameOver = "[blue]" + 
-        @"   ___                         ___                
-  / _ \__ _ _ __ ___   ___    /___\_   _____ _ __ 
- / /_\/ _` | '_ ` _ \ / _ \  //  /| \ / / _ \ '__|
-/ /_\\ (_| | | | | | |  __/ / \_// \ V /  __/ |   
-\____/\__,_|_| |_| |_|\___| \___/   \_/ \___|_|   " +
-                           "\n[/]";
+    private readonly string gameOver = "[blue]" + "Thanks for playing!" + "[/]";
+
 
     private readonly string[] mainMenuOptions = new[] { "\t\t\t     Start Game", 
                                                         "\t\t\t     Select Level", 
@@ -37,22 +32,29 @@ public class GameDisplay
     private readonly string gameLevelPrompt = "  Please select game difficulty:";
 
     private readonly string gameOverWin = "=================\\ !!! You Win !!! /=================";
+
     private readonly string gameOverLoss = "=================\\ !!! You Lose !!! /=================";
+  
+    private const int gamePanelWidth = 68;
 
-    const int titlePanelWidth = 68;
+   
+    Menu mainMenu;
+    Menu gameLevelMenu;
+    Menu restartMenu;
+   
+    BoardElement boardElement;
 
-    GameBoardElement boardElement;
-
-    public GameDisplay()
+    public Display()
     {
-        boardElement = new GameBoardElement();
+        boardElement = new BoardElement();
+        BuildMenus();
     }
 
     public void ShowTitle()
     {
         var titleWithMarkup = new Markup(gameTitle).Centered();
         var titlePanel = new Panel(titleWithMarkup).Border(BoxBorder.Double);
-        titlePanel.Width = titlePanelWidth;
+        titlePanel.Width = gamePanelWidth;
 
         AnsiConsole.Clear();
         AnsiConsole.Write(titlePanel);
@@ -63,68 +65,39 @@ public class GameDisplay
     {
         var gameOverWithMarkup = new Markup(gameOver).Centered();
         var gameOverPanel = new Panel(gameOverWithMarkup).Border(BoxBorder.Double);
+        gameOverPanel.Width = gamePanelWidth;
 
-        AnsiConsole.Clear();
         AnsiConsole.Write(gameOverPanel);
         AnsiConsole.WriteLine();
     }
 
-    public MainMenuOption ShowMainMenu()
+    public int ShowMainMenu()
     {
-       
-        MainMenuOption choice = MainMenuOption.StartGame;
-
         AnsiConsole.WriteLine();
 
-        var gameMenu = AnsiConsole.Prompt(new SelectionPrompt<string>()
-                            .Title("")
-                            .PageSize(5)
-                            .AddChoices(mainMenuOptions));
-
-        if (gameMenu == mainMenuOptions[0])
-        {
-           choice = MainMenuOption.StartGame;
-        }
-        else if (gameMenu == mainMenuOptions[1])
-        {
-           choice = MainMenuOption.SelectLevel;
-        }
-        else if (gameMenu == mainMenuOptions[2])
-        {
-           choice = MainMenuOption.ExitGame;
-        }
+        int choice = mainMenu.ShowMenu();
 
         return choice;
     }
 
-    public GameLevel ShowLevelMenu()
+    public int ShowLevelMenu()
     {
-        GameLevel choice = GameLevel.Normal;
-
         AnsiConsole.WriteLine();
 
-        var levelMenu = AnsiConsole.Prompt(new SelectionPrompt<string>()
-                            .Title(gameLevelPrompt)
-                            .PageSize(5)
-                            .MoreChoicesText("[grey](Move up and down to select)[/]")
-                            .AddChoices(gameLevelOptions));
+        int choice = gameLevelMenu.ShowMenu();
 
-        if (levelMenu == gameLevelOptions[0])
-        {
-            choice = GameLevel.Beginner;
-        }
-        else if (levelMenu == gameLevelOptions[1])
-        {
-            choice = GameLevel.Normal;
-        }
-        else if (levelMenu == gameLevelOptions[2])
-        {
-            choice = GameLevel.Difficult;
-        }
         return choice;
     }
 
-    public void ShowGameBoard(GameBoard board, GameStatus gameStatus)
+    public int ShowRestartMenu()
+    {
+        AnsiConsole.WriteLine();
+
+        int choice = restartMenu.ShowMenu();
+
+        return choice;
+    }
+    public void ShowGameBoard(Board board, GameStatus gameStatus)
     {
         var gameBoard = board.ExportInPlayGameBoard();
 
@@ -133,6 +106,8 @@ public class GameDisplay
             case GameStatus.Won:
             case GameStatus.Loss:
                 gameBoard = board.ExportUnmaskedGameBoard();
+                break;
+            default:
                 break;
         }
      
@@ -162,6 +137,8 @@ public class GameDisplay
                             case GameStatus.Loss:
                                 AnsiConsole.Background = Color.FromInt32((int)SquareColors.DarkRed);
                                 AnsiConsole.Foreground = Color.FromInt32((int)SquareColors.Black);
+                                break;
+                            default:
                                 break;
                         }
                         
@@ -210,7 +187,7 @@ public class GameDisplay
                     if (j == 0)
                     {
                         // calculate padding needed to center gameboard
-                        int padLength = (titlePanelWidth - (gameBoard.GetUpperBound(0) + 1) * 3) / 2;
+                        int padLength = (gamePanelWidth - (gameBoard.GetUpperBound(0) + 1) * 3) / 2;
                         if (padLength < 0) padLength = 0;
                         shift = "".PadLeft(padLength);
                     }
@@ -235,41 +212,13 @@ public class GameDisplay
         var gameInfoWithMarkup = new Markup("[blue]" + info + "[/]").Centered();
         var infoPanel = new Panel(gameInfoWithMarkup).Border(BoxBorder.Double);
 
-        infoPanel.Width= titlePanelWidth;
+        infoPanel.Width= gamePanelWidth;
     
         AnsiConsole.Write(infoPanel);
         AnsiConsole.WriteLine();
 
     }
-    public RestartMenuOption ShowRestartMenu()
-    {
-        RestartMenuOption choice = RestartMenuOption.Continue;
-
-        AnsiConsole.WriteLine();
-
-        var levelMenu = AnsiConsole.Prompt(new SelectionPrompt<string>()
-                           .Title("")
-                           .PageSize(5)
-                           .MoreChoicesText("[grey](Move up and down to select)[/]")
-                           .AddChoices(restartGameOptions));
-
-        if (levelMenu == restartGameOptions[0])
-        {
-            choice = RestartMenuOption.Continue;
-        }
-        else if (levelMenu == restartGameOptions[1])
-        {
-            choice = RestartMenuOption.GoToMainMenu;
-        }
-        else if(levelMenu == restartGameOptions[2])
-        {
-            choice = RestartMenuOption.ExitGame;
-        }
-
-        return choice;
-
-    }
-
+  
     public void ShowGameResult(GameStatus gameStatus)
     {
         string resultInfo = string.Empty;
@@ -285,12 +234,14 @@ public class GameDisplay
             case GameStatus.Loss:
                 resultInfo = "[red]" + gameOverLoss + "[/]";
                 break;
+            default:
+                break;
         }
 
         var resultInfoWithMarkup = new Markup(resultInfo).Centered();
         var gameResultPanel = new Panel(resultInfoWithMarkup).Border(BoxBorder.Double);
 
-        gameResultPanel.Width = titlePanelWidth;
+        gameResultPanel.Width = gamePanelWidth;
 
         AnsiConsole.Write(gameResultPanel);
         AnsiConsole.WriteLine();
@@ -302,4 +253,38 @@ public class GameDisplay
         return boardCell.Trim().Substring(1, 1);
     }
 
+    private void BuildMenus()
+    {
+        // build main menu
+        MenuOption[] mainMenuItems =
+        {
+            new MenuOption(mainMenuOptions[0], (int) MainMenuOption.StartGame),
+            new MenuOption(mainMenuOptions[1], (int) MainMenuOption.SelectLevel),
+            new MenuOption(mainMenuOptions[2], (int) MainMenuOption.ExitGame),
+        };
+
+        mainMenu = new Menu(mainMenuItems);
+
+        // build game level menu
+        MenuOption[] gameLevelItems =
+        {
+            new MenuOption(gameLevelOptions[0], (int) GameLevel.Beginner),
+            new MenuOption(gameLevelOptions[1], (int) GameLevel.Normal),
+            new MenuOption(gameLevelOptions[2], (int) GameLevel.Difficult),
+
+        };
+
+        gameLevelMenu = new Menu(gameLevelItems);
+        gameLevelMenu.MenuPrompt = gameLevelPrompt;
+
+        // build restart menu
+        MenuOption[] restartItems =
+        {
+            new MenuOption(restartGameOptions[0], (int) RestartMenuOption.Continue),
+            new MenuOption(restartGameOptions[1], (int) RestartMenuOption.GoToMainMenu),
+            new MenuOption(restartGameOptions[2], (int) RestartMenuOption.ExitGame),
+        };
+
+        restartMenu = new Menu(restartItems);
+    }
 }
