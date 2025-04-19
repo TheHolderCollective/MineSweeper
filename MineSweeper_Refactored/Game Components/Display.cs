@@ -112,18 +112,8 @@ public class Display
 
     public void ShowGameBoard(Board board, GameStatus gameStatus)
     {
-        var gameBoard = board.ExportInPlayGameBoard();
+        var gameBoard = board.ExportGameBoard(gameStatus);
 
-        switch (gameStatus)
-        {
-            case GameStatus.Won:
-            case GameStatus.Loss:
-                gameBoard = board.ExportUnmaskedGameBoard();
-                break;
-            default:
-                break;
-        }
-     
         // display actual board
         for (int i = 0; i <= gameBoard.GetUpperBound(0); i++)
         {
@@ -154,7 +144,6 @@ public class Display
                             default:
                                 break;
                         }
-                        
                     }
                     else
                     {
@@ -208,7 +197,6 @@ public class Display
                     {
                         shift = String.Empty; 
                     }    
-                     
                     AnsiConsole.Write(shift + gameBoard[i, j]);
                 }
 

@@ -70,7 +70,7 @@ public class Board
         }
     }
 
-    public string[,] ExportInPlayGameBoard()
+    public string[,] ExportGameBoard(GameStatus gameStatus)
     {
         var gameBoard = game_board;
         var choiceBoard = choice_board;
@@ -79,86 +79,6 @@ public class Board
 
         string[,] exportGameBoard = new string[gameBoardSize, gameBoardSize];
 
-
-        // write headers
-        for (int boardColumn = 0; boardColumn < gameBoardSize; boardColumn++)
-        {
-            if (boardColumn == 0) 
-            {
-                exportGameBoard[ColumnLabelRow, ColumnLabelRow] = String.Format($"{boardElement.EmptyCell}{boardElement.EmptyCell}");
-            }
-            else if (boardColumn <= 9)
-            {
-                exportGameBoard[ColumnLabelRow, boardColumn] = String.Format($"  {boardColumn}");
-
-                if (boardColumn == 9) // extra space after 9 ensures correct positioning of remaining numbers
-                {
-                    exportGameBoard[ColumnLabelRow, boardColumn] = exportGameBoard[ColumnLabelRow, boardColumn] + " ";
-                }
-            }
-            else if (boardColumn >= 9 && boardColumn < gameBoardSize)
-            {
-                exportGameBoard[ColumnLabelRow, boardColumn] = String.Format($" {boardColumn}");
-            }
-
-            if (boardColumn == gameBoardSize - 1) // new line needed on last number
-            {
-                exportGameBoard[ColumnLabelRow, boardColumn] = exportGameBoard[ColumnLabelRow, boardColumn] + "\n";
-            }
-
-        }
-
-        // write rows
-        for (int boardRow = 1; boardRow < gameBoardSize; boardRow++)
-        {
-            for (int boardColumn = 0; boardColumn < gameBoardSize; boardColumn++)
-            {
-                // prints row labels
-                if (boardColumn == RowLabelColumn)
-                {
-                    if (boardRow <= 9)
-                    {
-                        exportGameBoard[boardRow, RowLabelColumn] = String.Format($" {boardRow} ");
-                    }
-                    else
-                    {
-                        exportGameBoard[boardRow, RowLabelColumn] = String.Format($"{boardRow} ");
-                    }
-
-                }
-                else
-                {
-                    // prints actual cells from gameboard based on choiceboard
-                    if (choiceBoard[boardRow - 1, boardColumn - 1] == false)
-                    {
-                        exportGameBoard[boardRow, boardColumn] = String.Format($"{boardElement.HiddenCell}");
-
-                    }
-                    else if ((choiceBoard[boardRow - 1, boardColumn - 1] == true) && (gameBoard[boardRow - 1, boardColumn - 1] != boardElement.CellBomb))
-                    {
-                        exportGameBoard[boardRow, boardColumn] = String.Format($"|{gameBoard[boardRow - 1, boardColumn - 1]}|");
-                    }
-
-                    if (boardColumn == gameBoardSize - 1)
-                    {
-                        exportGameBoard[boardRow, boardColumn] = exportGameBoard[boardRow, boardColumn] + "\n";
-                    }
-                }
-
-            }
-        }
-
-        return exportGameBoard;
-    }
-
-    public string[,] ExportUnmaskedGameBoard()
-    {
-        var gameBoard = game_board;
-        var choiceBoard = choice_board;
-
-        int gameBoardSize = boardSize + 1;
-
-        string[,] exportGameBoard = new string[gameBoardSize, gameBoardSize];
 
         // write headers
         for (int boardColumn = 0; boardColumn < gameBoardSize; boardColumn++)
@@ -208,18 +128,43 @@ public class Board
                 }
                 else
                 {
-                    exportGameBoard[boardRow, boardColumn] = String.Format($"|{game_board[boardRow-1, boardColumn-1]}|");
-
-                    if (boardColumn == gameBoardSize - 1)
+                    if (gameStatus == GameStatus.InProgress)
                     {
-                        exportGameBoard[boardRow, boardColumn] = exportGameBoard[boardRow, boardColumn] + "\n";
+                        // prints actual cells from gameboard based on choiceboard
+                        if (choiceBoard[boardRow - 1, boardColumn - 1] == false)
+                        {
+                            exportGameBoard[boardRow, boardColumn] = String.Format($"{boardElement.HiddenCell}");
+
+                        }
+                        else if ((choiceBoard[boardRow - 1, boardColumn - 1] == true) && (gameBoard[boardRow - 1, boardColumn - 1] != boardElement.CellBomb))
+                        {
+                            exportGameBoard[boardRow, boardColumn] = String.Format($"|{gameBoard[boardRow - 1, boardColumn - 1]}|");
+                        }
+
+                        if (boardColumn == gameBoardSize - 1)
+                        {
+                            exportGameBoard[boardRow, boardColumn] = exportGameBoard[boardRow, boardColumn] + "\n";
+                        }
                     }
+                    else if ((gameStatus == GameStatus.Won) || (gameStatus == GameStatus.Loss))
+                    {
+                        exportGameBoard[boardRow, boardColumn] = String.Format($"|{game_board[boardRow - 1, boardColumn - 1]}|");
+
+                        if (boardColumn == gameBoardSize - 1)
+                        {
+                            exportGameBoard[boardRow, boardColumn] = exportGameBoard[boardRow, boardColumn] + "\n";
+                        }
+
+                    }
+                    
                 }
+
             }
         }
 
         return exportGameBoard;
     }
+    
     public bool IsCellBomb((int x,int y) inputCell)
     {
         return (game_board[inputCell.x - 1, inputCell.y - 1] == boardElement.CellBomb) ? true : false;
