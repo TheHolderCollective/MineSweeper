@@ -196,7 +196,7 @@ public class Display
                     else
                     {
                         shift = String.Empty; 
-                    }    
+                    }     
                     AnsiConsole.Write(shift + gameBoard[i, j]);
                 }
 
