@@ -3,6 +3,7 @@ This is a simple minesweeper console application which is a modification of this
 
 The code was refactored to use classes, and the [Spectre.Console](https://spectreconsole.net/) library was used to improve the interface.
 
+Blog Post: [Minesweeper - A Refactoring Exercise](https://theholdercollective.github.io/posts/Minesweeper-A-Refactoring-Exercise/)
 # Documention
 A detailed description of how to play can be found here: [Instructions](doc/Instructions.md)
 
