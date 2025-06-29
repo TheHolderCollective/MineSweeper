@@ -49,7 +49,7 @@ public class Display
         BuildMenus();
     }
 
-    public void ShowGameDisplay(Board gameBoard,GameLevel gameLevel, GameStatus gameStatus, bool showGameResult)
+    public void ShowGameDisplay(Board gameBoard, GameLevel gameLevel, GameStatus gameStatus, bool showGameResult)
     {
         ShowTitle();
         ShowGameInformation(gameBoard.BombCount, gameLevel);
