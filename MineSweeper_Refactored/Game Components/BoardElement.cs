@@ -46,6 +46,7 @@
                 return cellUnknown[0];
             }
         }
+        
         public BoardElement()
         {
             cellBomb = "*"; 

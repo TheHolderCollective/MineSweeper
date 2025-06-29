@@ -32,6 +32,7 @@ public class Board
     {
         get { return game_board; }
     }
+
     public Board(GameLevel gameLevel)
     {
         SetBoardParameters(gameLevel);
@@ -40,6 +41,7 @@ public class Board
         boardElement = new BoardElement();
         Initialise();
     }
+
     public void Initialise()
     {
         SetBombs();
@@ -174,6 +176,7 @@ public class Board
     {
         return (inputCell.x < 1 || inputCell.x > boardSize || inputCell.y < 1 || inputCell.y > boardSize);
     }
+
     public void UpdateBoard((int x, int y) inputCell)
     {
         int x = inputCell.x - 1;
@@ -354,6 +357,7 @@ public class Board
             }
         }
     }
+
     private void SetBoardParameters(GameLevel gameLevel)
     {
 

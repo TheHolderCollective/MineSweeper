@@ -41,13 +41,24 @@ public class Display
     Menu mainMenu;
     Menu gameLevelMenu;
     Menu restartMenu;
-   
     BoardElement boardElement;
 
     public Display()
     {
         boardElement = new BoardElement();
         BuildMenus();
+    }
+
+    public void ShowGameDisplay(Board gameBoard,GameLevel gameLevel, GameStatus gameStatus, bool showGameResult)
+    {
+        ShowTitle();
+        ShowGameInformation(gameBoard.BombCount, gameLevel);
+        ShowGameBoard(gameBoard, gameStatus);
+
+        if (showGameResult)
+        {
+            ShowGameResult(gameStatus);
+        }
     }
 
     public void ShowTitle()
@@ -71,21 +82,39 @@ public class Display
         AnsiConsole.WriteLine();
     }
 
-    public int ShowMainMenu()
+    public MainMenuOption ShowMainMenu()
     {
-        return ShowMenu(MenuType.MainMenu);
+        return (MainMenuOption) ShowMenu(MenuType.MainMenu);
     }
-
-    public int ShowLevelMenu()
+    
+    public MainMenuOption ShowMainMenuWithTitle()
     {
-        return ShowMenu(MenuType.GameLevelMenu);
+        ShowTitle();
+        return ShowMainMenu();
     }
-
-    public int ShowRestartMenu()
+    
+    public RestartMenuOption ShowRestartMenu()
     {
-        return ShowMenu(MenuType.RestartMenu);
+        return (RestartMenuOption) ShowMenu(MenuType.RestartMenu);
     }
-
+    
+    public RestartMenuOption ShowRestartMenuWithTitle()
+    {
+        ShowTitle();
+        return ShowRestartMenu();
+    }
+    
+    public GameLevel ShowLevelMenu()
+    {
+        return (GameLevel) ShowMenu(MenuType.GameLevelMenu);
+    }
+    
+    public GameLevel ShowLevelMenuWithTitle()
+    {
+        ShowTitle();
+        return ShowLevelMenu();
+    }
+    
     private int ShowMenu(MenuType menuType)
     {
         int choice = 0;
@@ -109,7 +138,7 @@ public class Display
 
         return choice;
     }
-
+    
     public void ShowGameBoard(Board board, GameStatus gameStatus)
     {
         var gameBoard = board.ExportGameBoard(gameStatus);
@@ -204,7 +233,7 @@ public class Display
         }
       
     }
-
+   
     public void ShowGameInformation(int bombCount, GameLevel gameLevel)
     {
         string? level = Enum.GetName(typeof(GameLevel), gameLevel);
@@ -219,7 +248,7 @@ public class Display
         AnsiConsole.WriteLine();
 
     }
-  
+    
     public void ShowGameResult(GameStatus gameStatus)
     {
         string resultInfo = string.Empty;

@@ -4,7 +4,7 @@ namespace MineSweeper.Menu_Components;
 public class Menu
 {
     private List<MenuOption> optionsList;
-    public string  MenuPrompt{ get; set; } 
+    public string  MenuPrompt{ get; set;} 
 
     public Menu(MenuOption[] options)
     {

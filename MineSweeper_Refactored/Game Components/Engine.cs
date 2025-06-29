@@ -2,13 +2,13 @@
 
 public class Engine
 {
-    static (int x, int y) cell;
-    static Board? gameBoard;
-    static GameLevel gameLevel;
+    private (int x, int y) cell;
+    private Board? gameBoard;
+    private GameLevel gameLevel;
 
-    static Display? gameDisplay;
-    static MainMenuOption menuOption;
-    static RestartMenuOption restartOption;
+    private Display? gameDisplay;
+    private MainMenuOption menuOption;
+    private RestartMenuOption restartOption;
 
     public Engine()
     {
@@ -22,8 +22,7 @@ public class Engine
 
         while (continueGame)
         {
-            gameDisplay.ShowTitle();
-            menuOption = (MainMenuOption) gameDisplay.ShowMainMenu();
+            menuOption = gameDisplay.ShowMainMenuWithTitle();
 
             switch (menuOption)
             {
@@ -44,7 +43,6 @@ public class Engine
         gameDisplay.ShowGameOver();
         Environment.Exit(0);
     }
-
     private void PlayGame()
     {
         GameStatus gameStatus = GameStatus.InProgress;
@@ -54,15 +52,10 @@ public class Engine
       
         while (gameStatus == GameStatus.InProgress)
         {
-            gameDisplay.ShowTitle();
-            gameDisplay.ShowGameInformation(gameBoard.BombCount, gameLevel);
-            gameDisplay.ShowGameBoard(gameBoard, gameStatus);
+            gameDisplay.ShowGameDisplay(gameBoard, gameLevel, gameStatus, false);
 
             try
             {
-                // for testing only
-                //Console.Write($"\nLast cell: {cell.x},{cell.y}");
-                //
                 cell = GetCellCoordinates();
                 validInput = gameBoard.IsCellOutOfBounds(cell) ? false : true;
             }
@@ -81,17 +74,12 @@ public class Engine
                     gameStatus = gameBoard.IsGameWon() ? GameStatus.Won : GameStatus.InProgress;
                 }
 
-
                 if (gameStatus != GameStatus.InProgress)
                 {
-                    gameDisplay.ShowTitle();
-                    gameDisplay.ShowGameInformation(gameBoard.BombCount, gameLevel);
-                    gameDisplay.ShowGameBoard(gameBoard, gameStatus); 
-                    gameDisplay.ShowGameResult(gameStatus);
+                    gameDisplay.ShowGameDisplay(gameBoard, gameLevel, gameStatus, true);
 
                     Console.ReadKey();
-                    gameDisplay.ShowTitle();
-                    restartOption = (RestartMenuOption) gameDisplay.ShowRestartMenu();
+                    restartOption = gameDisplay.ShowRestartMenuWithTitle();
 
                     switch (restartOption)
                     {
@@ -115,15 +103,11 @@ public class Engine
             }
         }
     }
-
-    private static void SetGameLevel()
+    private void SetGameLevel()
     {
-        gameDisplay.ShowTitle();
-        gameLevel = (GameLevel) gameDisplay.ShowLevelMenu();
-
+        gameLevel = gameDisplay.ShowLevelMenuWithTitle();
     }
-
-    private static (int, int) GetCellCoordinates()
+    private (int, int) GetCellCoordinates()
     {
         (int x, int y) cell;
 
@@ -142,7 +126,6 @@ public class Engine
         {
             throw;
         }
-
         return cell;
     }
 
